@@ -1,0 +1,4 @@
+name = "SparseSampling"
+uuid = "4b86fa8e-ad75-11e9-1ce9-1d0947cac08a"
+authors = ["Zachary Sunberg <sunbergzach@gmail.com>"]
+version = "0.1.0"
