@@ -52,7 +52,9 @@ function action(p::SSPlanner, b)
     astar::actiontype(p.m)
     belief = collect(rand(rng, b) for i in 1:p.opt.width)
     for a in actions(p.m)
-        if estimate_q(p.m, belief, a, p.opt, p.rng) >= qstar
+        q = estimate_q(p.m, belief, a, p.opt, p.rng)
+        if q >= qstar
+            qstar = q
             astar = a
         end
     end
