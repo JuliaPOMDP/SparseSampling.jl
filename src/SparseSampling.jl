@@ -3,6 +3,15 @@ module SparseSampling
 using Random
 using POMDPs
 using Parameters
+using StaticArrays
+using POMDPModelTools
+
+export
+    SSOptions,
+    SparseSamplingSolver,
+    POWSSOptions,
+    SSPlanner,
+    actionvaluepairs
 
 abstract type AbstractSSOptions end
 
@@ -25,7 +34,7 @@ struct SparseSamplingSolver
     rng::AbstractRNG
 end
 
-SparseSamplingSolver(opt::AbstractSSOptions; rng=Random.GLOBAL_RNG) = SparseSamplingSolver(SSOptions(kwargs...), rng)
+SparseSamplingSolver(opt::AbstractSSOptions; rng=Random.GLOBAL_RNG) = SparseSamplingSolver(opt, rng)
 SparseSamplingSolver(;rng=Random.GLOBAL_RNG, kwargs...) = SparseSamplingSolver(SSOptions(kwargs...), rng)
 
 POMDPs.solve(s::SparseSamplingSolver, m::Union{MDP,POMDP}) = SSPlanner(m, s.opt, s.rng)
