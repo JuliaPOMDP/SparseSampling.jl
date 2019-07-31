@@ -66,14 +66,14 @@ function estimate_q(opt::POWSSOptions, m::POMDP, belief::AbstractVector, a, dept
 
     for i in 1:width(opt) # needs to be a separate for loop because it needs all predictions
         o = observations[i]
-        _, w = weighted_state(belief, i)
-        for i in 1:width(opt)
-            s, w = weighted_state(belief, i)
-            sp = predictions[i]
-            nextbelief[i] = sp=>w*obs_weight(m, s, a, sp, o)
+        for j in 1:width(opt)
+            s, w = weighted_state(belief, j)
+            sp = predictions[j]
+            nextbelief[j] = sp=>w*obs_weight(m, s, a, sp, o)
         end
         vp = estimate_v(opt, m, nextbelief, depth+1, rng)
-        q += w*discount(m)*vp
+        _, ow = weighted_state(belief, i)
+        q += ow*discount(m)*vp
     end
     return q/wsum
 end
