@@ -1,0 +1,6 @@
+[deps]
+BeliefUpdaters = "8bb6e9a1-7d73-552c-a44a-e5dc5634aac4"
+ContinuousObservationToyPOMDPs = "2ca0707e-b47c-11e9-337c-577107eab44e"
+POMDPs = "a93abf59-7444-517b-a68a-c42f96afdd7d"
+QMDP = "3aa3ecc9-5a5d-57c8-8188-3e47bd8068d2"
+SparseSampling = "4b86fa8e-ad75-11e9-1ce9-1d0947cac08a"

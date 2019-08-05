@@ -3,7 +3,12 @@ function estimate_v(opt::AbstractSSOptions, m::POMDP, belief::AbstractVector, de
         return 0.0
     end
 
-    return maximum(estimate_q(opt, m, belief, a, depth, rng) for a in actions(m))
+    as = actions(m)
+    qs = MVector{length(as), Float64}(undef)
+    for (i,a) in enumerate(as)
+        qs[i] = estimate_q(opt, m, belief, a, depth, rng)
+    end
+    return maximum(qs)
 end
 
 function estimate_q(opt::SSOptions, m::POMDP, belief::AbstractVector, a, depth::Int, rng::AbstractRNG)
@@ -12,12 +17,14 @@ function estimate_q(opt::SSOptions, m::POMDP, belief::AbstractVector, a, depth::
 
     for i in 1:width(opt)
         s = belief[mod1(i, length(belief))]
-        sp, o, r = generate_sor(m, s, a, rng)
-        qsum += r
-        if haskey(children, o)
-            push!(children[o], sp)
-        else
-            children[o] = [sp]
+        if !isterminal(m, s)
+            sp, o, r = generate_sor(m, s, a, rng)
+            qsum += r
+            if haskey(children, o)
+                push!(children[o], sp)
+            else
+                children[o] = [sp]
+            end
         end
     end
 
@@ -28,14 +35,14 @@ function estimate_q(opt::SSOptions, m::POMDP, belief::AbstractVector, a, depth::
     return qsum/width(opt)
 end
 
-function actionvaluepairs(p::SSPlanner{M}, b) where M <: POMDP
+function valuepairs(p::SSPlanner{M}, b) where M <: POMDP
     belief = collect(rand(p.rng, b) for i in 1:p.opt.width)
     eq(a) = estimate_q(p.opt, p.m, belief, a, 0, p.rng)
     return (a=>eq(a) for a in actions(p.m))
 end
 
 function POMDPs.action(p::SSPlanner{M}, b) where M <:POMDP
-    avps = collect(actionvaluepairs(p, b))
+    avps = collect(valuepairs(p, b))
     best = avps[1]
     for av in avps[2:end]
         if last(av) > last(best)
@@ -49,31 +56,44 @@ end
 function estimate_q(opt::POWSSOptions, m::POMDP, belief::AbstractVector, a, depth::Int, rng::AbstractRNG)
     q = 0.0
     
-    predictions = MVector{opt.width, statetype(m)}(undef)
-    observations = MVector{opt.width, obstype(m)}(undef)
+    predictions = Vector{statetype(m)}(undef, opt.width)
+    observations = Vector{obstype(m)}(undef, opt.width)
 
+    allterminal = true
     wsum = 0.0
     for i in 1:width(opt)
         s, w = weighted_state(belief, i)
-        sp, o, r = generate_sor(m, s, a, rng)
-        predictions[i] = sp
-        observations[i] = o
+        if !isterminal(m, s)
+            allterminal = false
+            sp, o, r = generate_sor(m, s, a, rng)
+            predictions[i] = sp
+            observations[i] = o
+            q += w*r
+        end
         wsum += w
-        q += w*r
+    end
+    if allterminal
+        return 0.0
     end
 
-    nextbelief = MVector{opt.width, Pair{statetype(m), Float64}}(undef)
+    nextbelief = Vector{Pair{statetype(m), Float64}}(undef, opt.width)
 
     for i in 1:width(opt) # needs to be a separate for loop because it needs all predictions
-        o = observations[i]
-        for j in 1:width(opt)
-            s, w = weighted_state(belief, j)
-            sp = predictions[j]
-            nextbelief[j] = sp=>w*obs_weight(m, s, a, sp, o)
+        s, ow = weighted_state(belief, i)
+        if !isterminal(m, s)
+            o = observations[i]
+            for j in 1:width(opt)
+                s, w = weighted_state(belief, j)
+                if isterminal(m, s)
+                    nextbelief[j] = s=>0.0
+                else
+                    sp = predictions[j]
+                    nextbelief[j] = sp=>w*obs_weight(m, s, a, sp, o)
+                end
+            end
+            vp = estimate_v(opt, m, nextbelief, depth+1, rng)
+            q += ow*discount(m)*vp
         end
-        vp = estimate_v(opt, m, nextbelief, depth+1, rng)
-        _, ow = weighted_state(belief, i)
-        q += ow*discount(m)*vp
     end
     return q/wsum
 end

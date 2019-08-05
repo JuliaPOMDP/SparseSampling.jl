@@ -11,7 +11,7 @@ export
     SparseSamplingSolver,
     POWSSOptions,
     SSPlanner,
-    actionvaluepairs
+    valuepairs
 
 abstract type AbstractSSOptions end
 
@@ -37,8 +37,13 @@ end
 SparseSamplingSolver(opt::AbstractSSOptions; rng=Random.GLOBAL_RNG) = SparseSamplingSolver(opt, rng)
 SparseSamplingSolver(;rng=Random.GLOBAL_RNG, kwargs...) = SparseSamplingSolver(SSOptions(kwargs...), rng)
 
-POMDPs.solve(s::SparseSamplingSolver, m::Union{MDP,POMDP}) = SSPlanner(m, s.opt, s.rng)
-
+function POMDPs.solve(s::SparseSamplingSolver, m::Union{MDP,POMDP})
+    if s.opt isa POWSSOptions
+        @assert !(Nothing <: statetype(m)) "POWSS does not support problems where the state can be nothing (this can be fixed by adding Some in appropriate places)."
+        # @assert !(Nothing <: obstype(m)) "POWSS does not support problems where the observation can be nothing (this can be fixed by adding Some in appropriate places)."
+    end
+    SSPlanner(m, s.opt, s.rng)
+end
 struct SSPlanner{M<:Union{MDP,POMDP},O<:AbstractSSOptions,R<:AbstractRNG}
     m::M
     opt::O
