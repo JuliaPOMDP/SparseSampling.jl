@@ -2,6 +2,9 @@ using Test
 using SparseSampling
 using POMDPs
 using POMDPModels
+using Random
+
+Random.seed!(1)
 
 m = BabyPOMDP()
 
