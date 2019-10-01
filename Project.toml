@@ -4,6 +4,7 @@ authors = ["Zachary Sunberg <sunbergzach@gmail.com>"]
 version = "0.1.0"
 
 [deps]
+BeliefUpdaters = "8bb6e9a1-7d73-552c-a44a-e5dc5634aac4"
 POMDPModelTools = "08074719-1b2a-587c-a292-00f91cc44415"
 POMDPs = "a93abf59-7444-517b-a68a-c42f96afdd7d"
 Parameters = "d96e819e-fc66-5662-9728-84c9c7592b0a"
@@ -13,6 +14,3 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 [extras]
 POMDPModels = "355abbd5-f08e-5560-ac9e-8b5f2592a0ca"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-
-[targets]
-test = ["Test", "POMDPModels"]

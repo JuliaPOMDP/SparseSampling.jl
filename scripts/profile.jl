@@ -14,15 +14,15 @@ b = initialize_belief(updater(qp), initialstate_distribution(m))
 @show actionvalues(qp, b)
 
 function f(width)
-    opt = SSOptions(3, width)
+    opt = POWSSOptions(5, width)
     p = solve(SparseSamplingSolver(opt), m)
     collect(valuepairs(p, b))
 end
 
 # @code_warntype observation(m, :left, :listen_1)
 
-@time f(20)
+@time f(10)
 
 Profile.clear()
-@profile f(20)
+@profile f(10)
 ProfileView.view()
