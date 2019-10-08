@@ -18,7 +18,7 @@ function estimate_q(opt::SSOptions, m::POMDP, belief::AbstractVector, a, depth::
     for i in 1:width(opt)
         s = belief[mod1(i, length(belief))]
         if !isterminal(m, s)
-            sp, o, r = generate_sor(m, s, a, rng)
+            sp, o, r = gen(DDNOut(:sp,:o,:r), m, s, a, rng)
             qsum += r
             if haskey(children, o)
                 push!(children[o], sp)
@@ -65,7 +65,7 @@ function estimate_q(opt::POWSSOptions, m::POMDP, belief::AbstractVector, a, dept
         s, w = weighted_state(belief, i)
         if !isterminal(m, s)
             allterminal = false
-            sp, o, r = generate_sor(m, s, a, rng)
+            sp, o, r = gen(DDNOut(:sp,:o,:r), m, s, a, rng)
             predictions[i] = sp
             observations[i] = o
             q += w*r

@@ -1,3 +1,4 @@
+using Distributed
 using ContinuousObservationToyPOMDPs
 @everywhere using SparseSampling
 using QMDP
@@ -8,11 +9,12 @@ using IncrementalPruning
 using SARSOP
 using DataFrames
 using Statistics
-using Distributed
-using Gadfly
-using Query
 using POMDPModelTools
 using ProgressMeter
+using Dates
+using CSV
+
+datestring = Dates.format(now(), "e_d_u_Y_HH_MM")
 
 m = COTigerPOMDP()
 qp = solve(QMDPSolver(), m)
@@ -56,7 +58,7 @@ if recalc
                             max=mn+3*sem,
                             min=mn-3*sem,
                             width=width,
-                            solver="Sparse Sampling",
+                            solver="POSS",
                             action=a
                            ))
         end
@@ -87,8 +89,14 @@ if recalc
     recalc = false
 end
 
+fname = joinpath(dirname(@__FILE__()), "data", "results_"*datestring*".csv")
+CSV.write(fname, results)
+
+# Gadfly plots
+#=
 # plotted = results[results[:solver].=="POWSS" & (results[:action] (:listen1, :listen2)), :]
 plotted = results |> @filter(_.solver=="POWSS") |> @filter(_.action in (:listen1, :listen2)) |> DataFrame
+@show plotted
 
 optimal = DataFrame(action=ordered_actions(m), value=collect(actionvalues(op, b)))
 optimal = optimal |> @filter(_.action in (:listen1, :listen2)) |> DataFrame
@@ -98,3 +106,4 @@ p1 = plot(
           layer(optimal, yintercept=:value, color=:action, Geom.hline),
           layer(plotted, x=:width, y=:mean, ymin=:min, ymax=:max, color=:action, Geom.line, Geom.ribbon),
          )
+=#
