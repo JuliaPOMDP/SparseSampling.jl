@@ -20,18 +20,19 @@ maxwidth = 41
 widthstep = 4
 depth = 3
 p_correct = 0.85
+r_findtiger = -10.0
 
 datestring = Dates.format(now(), "e_d_u_Y_HH_MM")
 
-m = TimedCOTigerPOMDP(horizon=depth, p_correct=p_correct)
+m = TimedCOTigerPOMDP(horizon=depth, p_correct=p_correct, r_findtiger=r_findtiger)
 qp = solve(QMDPSolver(), m)
 b = initialize_belief(updater(qp), initialstate_distribution(m))
 @show qp.action_map
 @show actionvalues(qp, b)
 
-dm = TimedDOTigerPOMDP(horizon=depth, p_correct=p_correct)
-op  = solve(SARSOPSolver(), dm)
-# op  = solve(PruneSolver(), dm)
+dm = TimedDOTigerPOMDP(horizon=depth, p_correct=p_correct, r_findtiger=r_findtiger)
+# op  = solve(SARSOPSolver(), dm)
+op  = solve(PruneSolver(), dm)
 b = initialize_belief(updater(op), initialstate_distribution(dm))
 @show op.action_map
 @show actionvalues(op, b)
@@ -104,8 +105,8 @@ if recalc
 
         ad = Dict{Symbol, Vector{Float64}}(a=>Float64[] for a in actions(m))
         pomcpow_results = @showprogress pmap(1:n) do i
-            solver = POMCPOWSolver(criterion=MaxUCB(200.0),
-                                   tree_queries=100_000,
+            solver = POMCPOWSolver(criterion=MaxUCB(20.0),
+                                   tree_queries=width^3,
                                    # max_depth=4,
                                    # max_time=0.1,
                                    enable_action_pw=false,

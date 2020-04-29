@@ -19,7 +19,8 @@ widthstep = 4
 depth = 3
 p_correct = 0.85
 
-fname = joinpath(dirname(@__FILE__()), "data", "width_41_Mon_7_Oct_2019_16_55.csv")
+# fname = joinpath(dirname(@__FILE__()), "data", "width_41_Mon_7_Oct_2019_16_55.csv")
+fname = joinpath(dirname(@__FILE__()), "data", "width_41_Wed_29_Apr_2020_15_46.csv")
 
 # pgfplots()
 pyplot()
