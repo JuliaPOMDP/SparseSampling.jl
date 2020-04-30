@@ -1,5 +1,8 @@
 using Distributed
-using ContinuousObservationToyPOMDPs
+@everywhere using Pkg
+@everywhere Pkg.activate(".")
+@everywhere using POMDPPolicies
+@everywhere using ContinuousObservationToyPOMDPs
 @everywhere using SparseSampling
 using QMDP
 @everywhere using POMDPs
@@ -9,11 +12,13 @@ using IncrementalPruning
 using SARSOP
 using DataFrames
 using Statistics
-using POMDPModelTools
+@everywhere using POMDPModelTools
 using ProgressMeter
 using Dates
 using CSV
-using POMCPOW
+@everywhere using POMCPOW
+@everywhere using DiscreteValueIteration
+
 
 n = 200
 maxwidth = 41
@@ -105,13 +110,22 @@ if recalc
 
         ad = Dict{Symbol, Vector{Float64}}(a=>Float64[] for a in actions(m))
         pomcpow_results = @showprogress pmap(1:n) do i
-            solver = POMCPOWSolver(criterion=MaxUCB(20.0),
+            solver = POMCPOWSolver(criterion=MaxUCB(-2*r_findtiger),
+                                   # tree_queries=max(100, ceil(Int, (width/4)^4)),
                                    tree_queries=width^3,
-                                   # max_depth=4,
-                                   # max_time=0.1,
                                    enable_action_pw=false,
                                    k_observation=width,
-                                   alpha_observation=0.0
+                                   alpha_observation=0.0,
+                                   # estimate_value=10.0
+                                   # estimate_value=FORollout(
+                                   #     FunctionPolicy(function (s)
+                                   #         ts = ContinuousObservationToyPOMDPs.tigerstate(s)
+                                   #         if ts == :left
+                                   #             return :right
+                                   #         else
+                                   #             return :left
+                                   #         end
+                                   #     end))
                                   )
             pomcpow_planner = solve(solver, m)
             oa = ordered_actions(m)
