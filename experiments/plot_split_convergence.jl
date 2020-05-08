@@ -72,7 +72,8 @@ Sa = Set([IncrementalPruning.AlphaVec(α,a) for α in IncrementalPruning.incprun
 bvec = zeros(length(states(dm)))
 bvec[stateindex(dm, (:left, 0))] = 0.5 
 bvec[stateindex(dm, (:right, 0))] = 0.5
-@show optpairs[:wait] = maximum(dot(bvec, α.alpha) for α in Sa)
+@assert optpairs[:wait] == maximum(dot(bvec, α.alpha) for α in Sa)
+@show optpairs
 
 for a in [:wait, :listen]
     plot!(plots[string(a)], [1, maximum(results[!, :width])], fill(optpairs[a], 2),
