@@ -15,7 +15,7 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Parameters = "0.12"
 BeliefUpdaters = "0.2"
 POMDPModelTools = "0.3"
-POMDPs = "0.8"
+POMDPs = "0.8, 0.9"
 
 [extras]
 POMDPModels = "355abbd5-f08e-5560-ac9e-8b5f2592a0ca"
