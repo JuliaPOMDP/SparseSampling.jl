@@ -13,6 +13,9 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
 POMDPs = "0.8"
+Parameters = "0.12"
+BeliefUpdaters = "0.2"
+POMDPs = "0.8"
 StaticArrays = "1"
 
 [extras]
